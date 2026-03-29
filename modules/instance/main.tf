@@ -1,9 +1,15 @@
-resource "aws_instance" "this" {
-  ami           = var.ami
+module "ec2_instance" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+
+  name = var.instance_name
+
   instance_type = var.instance_type
-  subnet_id     = var.subnet_id
+  key_name      = "user1"
+  monitoring    = true
+  subnet_id     = "subnet-eddcdzz4"
 
   tags = {
-    Name = var.instance_name
+    Terraform   = "true"
+    
   }
 }
