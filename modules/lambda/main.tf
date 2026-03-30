@@ -1,3 +1,4 @@
+# Create IAM role
 resource "aws_iam_role" "lambda_role" {
   name = "${var.function_name}-role"
 
@@ -11,11 +12,26 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
+# Attach basic execution policy (CloudWatch logs)
+resource "aws_iam_role_policy_attachment" "basic" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# ZIP the lambda folder automatically
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_dir  = var.lambda_source_path
+  output_path = "${path.module}/lambda.zip"
+}
+
+# Create Lambda
 resource "aws_lambda_function" "this" {
   function_name = var.function_name
   role          = aws_iam_role.lambda_role.arn
-  handler       = "lambda_function.lambda_handler"
+  handler       = "lambda.lambda_handler"
   runtime       = "python3.11"
-  filename      = var.filename
-  source_code_hash = filebase64sha256(var.filename)
+
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 }
