@@ -1,15 +1,24 @@
-module "ec2_instance" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
+data "aws_ami" "ubuntu" {
+  most_recent = true
 
-  name = var.instance_name
+  filter {
+    name   = var.instance_name
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
 
-  instance_type = var.instance_type
-  key_name      = "user1"
-  monitoring    = true
-  subnet_id     = "subnet-eddcdzz4"
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+resource "aws_instance" "ec2-instance" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
 
   tags = {
-    Terraform   = "true"
-    
+    Name = "ec2-instance-assignment27March"
   }
 }
