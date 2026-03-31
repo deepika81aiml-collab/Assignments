@@ -3,4 +3,4 @@ variable "engine" { default = "mysql" }
 variable "instance_class" { default = "db.t3.micro" }
 variable "username" {}
 variable "password" {}
-variable "subnet_ids" { type = list(string) }
+variable "vpc_id" { type = string }
